@@ -1,26 +1,18 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-// const {  } = require('./helpers/utils')
+
 var allRoles = [];
 var allEmp = [];
 var allDepts = [];
 
-var newEmployee = {
-    first_name: '',
-    last_name: '',
-    role_id: 0,
-    manager_id: 0
-}
-
-
-const db = mysql.createConnection ({
+const db = mysql.createConnection ({ // establishing credentials with mySql every time db is called
     host: 'localhost',
     user: 'root',
     password: 'SeeMeInKOF15',
     database: 'employees_db'
 });
 
-const questions =  {
+const questions =  { //array of objects containing all questions used for inquirer
     menu: [
         {
             type: 'list',
@@ -113,12 +105,11 @@ const questions =  {
     ]
 }
 
-function mainMenu() {
+function mainMenu() { //main menu function. Inquirer prompt with vast switch statement
     console.log(`=======================================
                Main Menu
 =======================================`)
     inquirer.prompt(questions.menu).then((res) => {
-        console.log(res.menu);
         switch(res.menu){
             case 'View All Employees':
                 viewEmployees();
@@ -148,7 +139,7 @@ function mainMenu() {
 
 
 
-function addEmployee(){
+function addEmployee(){ //function to add new employee
     inquirer.prompt(questions.newEmp).then((res) => {
 
         let newRole = assignRole(res.role);
@@ -166,23 +157,16 @@ function addEmployee(){
 
 }
 
-function addRole(){
+function addRole(){ //function to add new role
     inquirer.prompt(questions.newRole).then((res) => {
-        console.log(res);
         let deptID = res.department;
         let departmentAssign;
         db.query('SELECT * FROM department;', function (err, data) {
-            console.log(data);
             for (var i = 0; i < data.length; i++){
                 if (deptID == data[i].department_name) {
-                    console.log(`dept == ${deptID} == ${data[i].department_name}`)
                     departmentAssign = parseInt(++i);
                 }
             }
-            console.log(departmentAssign);
-            console.log(`title: ${res.title}, 
-                salary: ${res.salary},
-                department_id: ${departmentAssign}`)
         })
         db.query('INSERT INTO rolename SET ?', { 
             title: res.title, 
@@ -194,7 +178,7 @@ function addRole(){
     })
 }
 
-function addDepartment(){
+function addDepartment(){ //function to add new department
     getDepts()
     inquirer.prompt(questions.newDept).then((res) => {
         db.query('INSERT INTO department SET ?', { 
@@ -205,16 +189,16 @@ function addDepartment(){
     })
 }
 
-function updateEmployee(){
-    inquirer.prompt(questions.updateEmp).then((res) => {
-        inquirer.prompt(questions.updatedEmp).then((res) => {
+// function updateEmployee(){
+//     inquirer.prompt(questions.updateEmp).then((res) => {
+//         inquirer.prompt(questions.updatedEmp).then((res) => {
 
-        })
-    })
-}
+//         })
+//     })
+// }
 
 
-function viewEmployees() {
+function viewEmployees() { //shows all employees
     console.log(`=======================================
     View All Employees
 =======================================`)
@@ -224,7 +208,7 @@ function viewEmployees() {
         return mainMenu();
 }
 
-function viewRoles() {
+function viewRoles() { //shows all roles
     console.log(`=======================================
           View All Roles
 =======================================`)
@@ -234,7 +218,7 @@ function viewRoles() {
     return mainMenu();
 }
 
-function viewDepts() {
+function viewDepts() { //shows all departments
     console.log(`=======================================
           View All Departments
 =======================================`)
@@ -244,51 +228,40 @@ function viewDepts() {
     return mainMenu();
 }
 
-function assignManager(manager) {
-    console.log(manager);
+function assignManager(manager) { //assigns the employee id number as new hire's manager
     var dbData = [];
-    
     db.query('SELECT * FROM employee;', function (err, data) {
         dbData = data;
-
         for (i = 0; i < data.length; i++){
             let managerName = JSON.stringify(data[i].first_name + data[i].last_name);
                 if (manager == managerName) {
-                    console.log(data[i]);
-                    console.log(`data[i].id = ${data[i].id}`);
                     return data[i].id;
                 }
             }
     })
 }
 
-function assignRole(role) {
-    console.log(role);
+function assignRole(role) { //assigns the role id number to the new entry
     db.query('SELECT * FROM rolename;', function (err, data) {
-        console.log(data);
         for (var i = 0; i < data.length; i++){
             if (role == JSON.stringify(data[i].title)) {
-                
-                console.log(`data[i].id = ${data[i].id}`);
                 return data[i].id;
             }
         }
     })
 }
 
-function getRoles() {
+function getRoles() { //function to grab the most up-to-date list of roles
     allRoles = [];
     db.query('SELECT * FROM rolename;', function (err, data) {
         for(var i = 0; i < data.length; i++){
-            console.log(data[i].title);
             allRoles.push(data[i].title);
         }
     })
-    console.log(allRoles);
     return allRoles;
 }
 
-function getEmployees() {
+function getEmployees() { //function to grab the most up-to-date list of employees
     allEmp = [];
     db.query('SELECT * FROM employee;', function (err, data) {
         for(var i = 0; i < data.length; i++){
@@ -296,11 +269,10 @@ function getEmployees() {
             allEmp.push(currentName);
         }
     })
-    console.log(allEmp);
     return allEmp;
 }
 
-function getDepts() {
+function getDepts() { //function to grab the most up-to-date list of departments
     allDepts = [];
     db.query('SELECT * FROM department;', function (err, data) {
         for(var i = 0; i < data.length; i++){
@@ -311,7 +283,7 @@ function getDepts() {
 }
 
 
-function init() {
+function init() { //initializes the application
     console.log(`=======================================
  Employee Tracker SQL: by Vincent Yang
 =======================================`);
