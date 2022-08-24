@@ -61,11 +61,35 @@ const questions =  {
             choices: getEmployees()
         }
     ],
+    updatedEmp: [
+        {
+            type: 'input',
+            name: 'firstName',
+            message: 'Update this employee\'s first name.',
+        },
+        {
+            type: 'input',
+            name: 'lastName',
+            message: 'Update this employee\'s last name.',
+        },
+        {
+            type: 'list',
+            name: 'update',
+            message: 'Update this employee\'s role.',
+            default: getRoles()
+        },
+        {
+            type: 'input',
+            name: 'update',
+            message: 'Update this employee\'s manager.',
+            default: getEmployees()
+        }
+    ],
     newRole: [
         {
             type: 'input',
-            name: 'role',
-            message: 'Enter the name of the role that you would like to add.',
+            name: 'title',
+            message: 'Enter the title of the role that you would like to add.',
         },
         {
             type: 'input',
@@ -105,16 +129,17 @@ function mainMenu() {
                 viewRoles();
                 break;
             case 'Add Employee':
-                return addEmployee();
+                addEmployee();
+                break;
+            case 'Add Role':
+                addRole();
+                break;
             case 'Add Department':
-                db.query('SELECT department.id, department.department_name AS "department", roleName.salary FROM rolename JOIN department ON department_name.department_id = department.id ORDER BY jobrole.id ASC', function (err, data){
-                    console.table(data)
-                })
-                return mainMenu();
+                addDepartment();
+                break;
             case 'Update Employee Role':
-                    return mainMenu();
-            case 'Done Editing':
-                return mainMenu();
+                updateEmployee();
+                break;
             }
 
         });
@@ -147,36 +172,60 @@ function addEmployee(){
         
         console.log(newEmployee);
     
-    }).then((res) => {
+    })//.then((res) => {
         
-    })
-
+    // })
 
 }
 
-// function updateEmployee(){
-//     inquirer.prompt(questions.newEmp)
-// }
-
 function addRole(){
     inquirer.prompt(questions.newRole).then((res) => {
-        var newRole = {
-            title: res.role,
+        console.log(res);
+        let deptID = res.department;
+        let departmentAssign;
+        db.query('SELECT * FROM department;', function (err, data) {
+            console.log(data);
+            for (var i = 0; i < data.length; i++){
+                if (deptID == data[i].department_name) {
+                    console.log(`dept == ${deptID} == ${data[i].department_name}`)
+                    departmentAssign = parseInt(++i);
+                }
+            }
+            console.log(departmentAssign);
+            console.log(`title: ${res.title}, 
+                salary: ${res.salary},
+                department_id: ${departmentAssign}`)
+        })
+        db.query('INSERT INTO rolename SET ?', { 
+            title: res.title, 
             salary: res.salary,
-            department_id: res.department
-        }
+            department_id: departmentAssign
+        }) 
+        console.log('Added successfully'),
+        mainMenu()
+        
     })
 }
 
 function addDepartment(){
     getDepts()
     inquirer.prompt(questions.newDept).then((res) => {
-        var newDept = res.department;
-        db.query(`INSERT INTO department (department_name)
-        VALUES
-            ('${newDept}');`)
+        db.query('INSERT INTO department SET ?', { 
+            department_name: res.department,
+        }) 
+        console.log('Added successfully'),
+        mainMenu()
     })
 }
+
+function updateEmployee(){
+    inquirer.prompt(questions.updateEmp).then((res) => {
+        inquirer.prompt(questions.updatedEmp).then((res) => {
+
+        })
+    })
+}
+
 
 function viewEmployees() {
     console.log(`=======================================
@@ -216,8 +265,8 @@ function assignManager(manager) {
         dbData = data;
 
         for (i = 0; i < data.length; i++){
-            let managerName = data[i].first_name + data[i].last_name;
-                if (manager = managerName) {
+            let managerName = JSON.stringify(data[i].first_name + data[i].last_name);
+                if (manager == managerName) {
                     console.log(data[i]);
                     console.log(`data[i].id = ${data[i].id}`);
                     return data[i].id;
@@ -229,10 +278,10 @@ function assignManager(manager) {
 function assignRole(role) {
     console.log(role);
     db.query('SELECT * FROM rolename;', function (err, data) {
-
+        console.log(data);
         for (i = 0; i < data.length; i++){
-            if (role = data[i].title) {
-                console.log(data[i]);
+            if (role == JSON.stringify(data[i].title)) {
+                
                 console.log(`data[i].id = ${data[i].id}`);
                 return data[i].id;
             }
@@ -254,9 +303,11 @@ function getEmployees() {
     allEmp = [];
     db.query('SELECT * FROM employee;', function (err, data) {
         for(i = 0; i < data.length; i++){
-            allEmp.push(`${data[i].first_name} ${data[i].last_name}`);
+            let currentName = `${data[i].first_name} ${data[i].last_name}`;          
+            allEmp.push(currentName);
         }
     })
+    console.log(allEmp);
     return allEmp;
 }
 
