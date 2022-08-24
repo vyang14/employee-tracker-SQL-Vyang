@@ -13,31 +13,31 @@ const questions =  {
     menu: [
         {
             type: 'list',
-            name: 'landing',
+            name: 'menu',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Employees', 'Add Role','View All Departments','Add Department']
+            choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Update Employee Role']
         }
     ],
     newEmp: [
         {
             type: 'input',
-            name: 'landing',
+            name: 'firstName',
             message: 'Please enter the new employee\'s first name.',
         },
         {
             type: 'input',
-            name: 'landing',
+            name: 'lastName',
             message: 'Please enter the new employee\'s last name.',
         },
         {
             type: 'list',
-            name: 'landing',
+            name: 'role',
             message: 'Select the new employee\'s role.',
             choices: ['choice 1']
         },
         {
             type: 'list',
-            name: 'landing',
+            name: 'manager',
             message: 'Select the new employee\'s manager.',
             choices: ['choice 1']
         }
@@ -45,7 +45,7 @@ const questions =  {
     updateEmp: [
         {
             type: 'list',
-            name: 'landing',
+            name: 'update',
             message: 'Please select which employee to update.',
             choices: ['choice 1']
         }
@@ -53,17 +53,17 @@ const questions =  {
     newRole: [
         {
             type: 'input',
-            name: 'landing',
+            name: 'role',
             message: 'Enter the name of the role that you would like to add.',
         },
         {
             type: 'input',
-            name: 'landing',
+            name: 'salary',
             message: 'Enter the salary for this role.',
         },
         {
             type: 'list',
-            name: 'landing',
+            name: 'department',
             message: 'Choose the department this role belongs to.',
             choices: ['choice 1']
         }
@@ -71,7 +71,7 @@ const questions =  {
     newDept: [
         {
             type: 'input',
-            name: 'landing',
+            name: 'department',
             message: 'Enter the name of the department that you would like to add.',
         },
     ]
@@ -79,57 +79,52 @@ const questions =  {
 
 function mainMenu() {
     inquirer.prompt(questions.menu).then((res) => {
-        switch(res){
+        switch(res.menu){
             case 'View All Employees':
-                db.query('SELECT department.id, department.department_name AS "department", roleName.salary FROM rolename JOIN department ON department_name.department_id = department.id ORDER BY jobrole.id ASC'), function (err, data){
+                db.query('SELECT * FROM employee;', function (err, data) {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        console.table(data);
+                    }
+                    return mainMenu();
+                })
+            case 'View All Departments':
+                db.query('SELECT department.id, department.department_name AS "department", roleName.salary FROM rolename JOIN department ON department_name.department_id = department.id ORDER BY jobrole.id ASC', function (err, data){
                     console.table(data)
                     return mainMenu();
-                }
-            case 'Add Employee':
-                {
+                })
+            case 'View All Roles':
                     return mainMenu();
-                }
-            case 'Update Employee Role':
-                {
-                    return mainMenu();
-                }
-            case 'View All Employees':
-                {
-                    return mainMenu();
-                }
-            case 'Add Role':
-                {
-                    return mainMenu();
-                }
-            case 'View All Departments':
-                {
-                    return mainMenu();
-                }
-            case 'Add Department': 
-            {
-                return mainMenu();
-            }
+            // case 'Add Employee':
+            //         return mainMenu();
+            // case 'Add Role':
+            //         return mainMenu();
+            // case 'Add Department':
+            //         return mainMenu();
+            // case 'Update Employee Role': 
+            //         return mainMenu();
         }
     });
 };
 
-function addEmployee(){
-    inquirer.prompt(questions.newEmp).then((res) => {
+// function addEmployee(){
+//     inquirer.prompt(questions.newEmp).then((res) => {
         
-    })
-}
+//     })
+// }
 
-function updateEmployee(){
-    inquirer.prompt(questions.newEmp)
-}
+// function updateEmployee(){
+//     inquirer.prompt(questions.newEmp)
+// }
 
-function addRole(){
+// function addRole(){
 
-}
+// }
 
-function addDepartment(){
+// function addDepartment(){
 
-}
+// }
 
 function init() {
     console.log(`=======================================
