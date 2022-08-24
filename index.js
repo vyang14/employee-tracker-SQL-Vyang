@@ -27,7 +27,7 @@ const questions =  {
             name: 'menu',
             message: 'What would you like to do?',
             choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Done Editing']
-        }
+        },
     ],
     newEmp: [
         {
@@ -42,24 +42,25 @@ const questions =  {
         },
         {
             type: 'list',
-            name: 'role',
-            message: 'Select the new employee\'s role.',
-            choices: getRoles()
+            name: 'manager',
+            message: 'Select the new employee\'s manager.',
+            choices: getEmployees(),
         },
         {
             type: 'list',
-            name: 'manager',
-            message: 'Select the new employee\'s manager.',
-            choices: getEmployees()
-        }
+            name: 'role',
+            message: 'Select the new employee\'s role.',
+            choices: getRoles(),
+        },
+        
     ],
     updateEmp: [
         {
             type: 'list',
             name: 'update',
             message: 'Please select which employee to update.',
-            choices: getEmployees()
-        }
+            choices: getEmployees(),
+        },
     ],
     updatedEmp: [
         {
@@ -74,15 +75,15 @@ const questions =  {
         },
         {
             type: 'list',
-            name: 'update',
+            name: 'role',
             message: 'Update this employee\'s role.',
-            default: getRoles()
+            default: getRoles(),
         },
         {
-            type: 'input',
-            name: 'update',
+            type: 'list',
+            name: 'manager',
             message: 'Update this employee\'s manager.',
-            default: getEmployees()
+            default: getEmployees(),
         }
     ],
     newRole: [
@@ -100,8 +101,8 @@ const questions =  {
             type: 'list',
             name: 'department',
             message: 'Choose the department this role belongs to.',
-            choices: getDepts()
-        }
+            choices: getDepts(),
+        },
     ],
     newDept: [
         {
@@ -146,35 +147,22 @@ function mainMenu() {
     };
 
 
-// db.query('SELECT department.id, department.department_name AS "department", roleName.salary FROM rolename JOIN department ON department_name.department_id = department.id ORDER BY jobrole.id ASC', function (err, data){
-//     console.table(data)
+
 function addEmployee(){
     inquirer.prompt(questions.newEmp).then((res) => {
-        // var dbData = [];
-        // db.query('SELECT * FROM employee;', function (err, data) {
-        //     dbData = JSON.stringify(data);            
-        // })
-        console.log(res.role);
-        console.log(res.manager);
 
         let newRole = assignRole(res.role);
         let newManager = assignManager(res.manager);
 
-        console.log(newRole);
-        console.log(newManager); 
-
-        var newEmployee = {
-            first_name: res.firstName,
+        db.query('INSERT INTO employee SET ?', { 
+            first_name: res.firstName, 
             last_name: res.lastName,
             role_id: newRole,
             manager_id: newManager
-        }
-        
-        console.log(newEmployee);
-    
-    })//.then((res) => {
-        
-    // })
+        }) 
+        console.log('Added successfully'),
+        mainMenu()
+    })
 
 }
 
@@ -203,7 +191,6 @@ function addRole(){
         }) 
         console.log('Added successfully'),
         mainMenu()
-        
     })
 }
 
@@ -279,7 +266,7 @@ function assignRole(role) {
     console.log(role);
     db.query('SELECT * FROM rolename;', function (err, data) {
         console.log(data);
-        for (i = 0; i < data.length; i++){
+        for (var i = 0; i < data.length; i++){
             if (role == JSON.stringify(data[i].title)) {
                 
                 console.log(`data[i].id = ${data[i].id}`);
@@ -292,17 +279,19 @@ function assignRole(role) {
 function getRoles() {
     allRoles = [];
     db.query('SELECT * FROM rolename;', function (err, data) {
-        for(i = 0; i < data.length; i++){
+        for(var i = 0; i < data.length; i++){
+            console.log(data[i].title);
             allRoles.push(data[i].title);
         }
     })
+    console.log(allRoles);
     return allRoles;
 }
 
 function getEmployees() {
     allEmp = [];
     db.query('SELECT * FROM employee;', function (err, data) {
-        for(i = 0; i < data.length; i++){
+        for(var i = 0; i < data.length; i++){
             let currentName = `${data[i].first_name} ${data[i].last_name}`;          
             allEmp.push(currentName);
         }
@@ -314,7 +303,7 @@ function getEmployees() {
 function getDepts() {
     allDepts = [];
     db.query('SELECT * FROM department;', function (err, data) {
-        for(i = 0; i < data.length; i++){
+        for(var i = 0; i < data.length; i++){
             allDepts.push(data[i].department_name);
         }
     })
