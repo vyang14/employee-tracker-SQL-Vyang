@@ -58,7 +58,7 @@ const questions =  {
             type: 'list',
             name: 'update',
             message: 'Please select which employee to update.',
-            choices: ['choice 1']
+            choices: getEmployees()
         }
     ],
     newRole: [
@@ -76,7 +76,7 @@ const questions =  {
             type: 'list',
             name: 'department',
             message: 'Choose the department this role belongs to.',
-            choices: ['choice 1']
+            choices: getDepts()
         }
     ],
     newDept: [
@@ -158,13 +158,25 @@ function addEmployee(){
 //     inquirer.prompt(questions.newEmp)
 // }
 
-// function addRole(){
+function addRole(){
+    inquirer.prompt(questions.newRole).then((res) => {
+        var newRole = {
+            title: res.role,
+            salary: res.salary,
+            department_id: res.department
+        }
+    })
+}
 
-// }
-
-// function addDepartment(){
-
-// }
+function addDepartment(){
+    getDepts()
+    inquirer.prompt(questions.newDept).then((res) => {
+        var newDept = res.department;
+        db.query(`INSERT INTO department (department_name)
+        VALUES
+            ('${newDept}');`)
+    })
+}
 
 function viewEmployees() {
     console.log(`=======================================
@@ -212,7 +224,6 @@ function assignManager(manager) {
                 }
             }
     })
-    
 }
 
 function assignRole(role) {
