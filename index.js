@@ -12,6 +12,26 @@ const db = mysql.createConnection ({ // establishing credentials with mySql ever
     database: 'employees_db'
 });
 
+db.query('SELECT * FROM rolename;', function (err, data) {
+    for(var i = 0; i < data.length; i++){
+        allRoles.push(data[i].title);
+    }  
+})
+
+db.query('SELECT * FROM employee;', function (err, data) {
+    for(var i = 0; i < data.length; i++){
+        let currentName = `${data[i].first_name} ${data[i].last_name}`;          
+        allEmp.push(currentName);
+    }
+
+})
+
+db.query('SELECT * FROM department;', function (err, data) {
+    for(var i = 0; i < data.length; i++){
+        allDepts.push(data[i].department_name);
+    }
+})
+
 const questions =  { //array of objects containing all questions used for inquirer
     menu: [
         {
@@ -34,15 +54,15 @@ const questions =  { //array of objects containing all questions used for inquir
         },
         {
             type: 'list',
-            name: 'manager',
-            message: 'Select the new employee\'s manager.',
-            choices: getEmployees(),
+            name: 'role',
+            message: 'Select the new employee\'s role.',
+            choices: allRoles,
         },
         {
             type: 'list',
-            name: 'role',
-            message: 'Select the new employee\'s role.',
-            choices: getRoles(),
+            name: 'manager',
+            message: 'Select the new employee\'s manager.',
+            choices: allEmp,
         },
         
     ],
@@ -51,7 +71,7 @@ const questions =  { //array of objects containing all questions used for inquir
             type: 'list',
             name: 'update',
             message: 'Please select which employee to update.',
-            choices: getEmployees(),
+            choices: allEmp,
         },
     ],
     updatedEmp: [
@@ -69,13 +89,13 @@ const questions =  { //array of objects containing all questions used for inquir
             type: 'list',
             name: 'role',
             message: 'Update this employee\'s role.',
-            default: getRoles(),
+            default: allRoles,
         },
         {
             type: 'list',
             name: 'manager',
             message: 'Update this employee\'s manager.',
-            default: getEmployees(),
+            default: allEmp,
         }
     ],
     newRole: [
@@ -93,7 +113,7 @@ const questions =  { //array of objects containing all questions used for inquir
             type: 'list',
             name: 'department',
             message: 'Choose the department this role belongs to.',
-            choices: getDepts(),
+            choices: allDepts,
         },
     ],
     newDept: [
@@ -121,31 +141,28 @@ function mainMenu() { //main menu function. Inquirer prompt with vast switch sta
                 viewRoles();
                 break;
             case 'Add Employee':
-                getEmployees()
-                getRoles()
-                getDepts()
+                // getEmployees()
+                // getRoles()
+                // getDepts()
                 addEmployee();
                 break;
             case 'Add Role':
-                getRoles()
-                getDepts()
+                // getRoles()
+                // getDepts()
                 addRole();
                 break;
             case 'Add Department':
                 addDepartment();
                 break;
             case 'Update Employee Role':
-                getEmployees()
-                getRoles()
-                getDepts()
+                // getEmployees()
+                // getRoles()
+                // getDepts()
                 updateEmployee();
                 break;
             }
-
         });
     };
-
-
 
 function addEmployee(){ //function to add new employee
     inquirer.prompt(questions.newEmp).then((res) => {
@@ -181,30 +198,31 @@ function addRole(){ //function to add new role
             title: res.title, 
             salary: res.salary,
             department_id: departmentAssign
-        }) 
+        })
+        allRoles.push(res.title); 
         console.log('Added successfully'),
         mainMenu()
     })
 }
 
 function addDepartment(){ //function to add new department
-    getDepts()
     inquirer.prompt(questions.newDept).then((res) => {
         db.query('INSERT INTO department SET ?', { 
             department_name: res.department,
         }) 
+        allDepts.push(res.department); 
         console.log('Added successfully'),
         mainMenu()
     })
 }
 
-// function updateEmployee(){
-//     inquirer.prompt(questions.updateEmp).then((res) => {
-//         inquirer.prompt(questions.updatedEmp).then((res) => {
+function updateEmployee(){
+    inquirer.prompt(questions.updateEmp).then((res) => {
+        inquirer.prompt(questions.updatedEmp).then((res) => {
 
-//         })
-//     })
-// }
+        })
+    })
+}
 
 
 function viewEmployees() { //shows all employees
@@ -259,42 +277,6 @@ function assignRole(role) { //assigns the role id number to the new entry
         }
     })
 }
-
-function getRoles() { //function to grab the most up-to-date list of roles
-    allRoles = [];
-    db.query('SELECT * FROM rolename;', function (err, data) {
-        for(var i = 0; i < data.length; i++){
-            allRoles.push(data[i].title);
-        }
-        console.log(allRoles);
-        return allRoles;
-    })
-}
-
-function getEmployees () { //function to grab the most up-to-date list of employees
-    allEmp = [];
-    db.query('SELECT * FROM employee;', function (err, data) {
-        for(var i = 0; i < data.length; i++){
-            let currentName = `${data[i].first_name} ${data[i].last_name}`;          
-            allEmp.push(currentName);
-            
-        }
-        console.log(allEmp);
-        return allEmp;
-    })
-}
-
-function getDepts() { //function to grab the most up-to-date list of departments
-    allDepts = [];
-    db.query('SELECT * FROM department;', function (err, data) {
-        for(var i = 0; i < data.length; i++){
-            allDepts.push(data[i].department_name);
-        }
-        console.log(allDepts);
-        return allDepts;
-    })
-}
-
 
 function init() { //initializes the application
     console.log(`=======================================
