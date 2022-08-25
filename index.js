@@ -222,17 +222,18 @@ function viewEmployees() { //shows all employees
     console.log(`=======================================
     View All Employees
 =======================================`)
-        db.query('SELECT employee.id AS Employee_ID, CONCAT (employee.first_name, " ", employee.last_name) AS Employee_Name, rolename.title AS Title, department.department_name AS Department, rolename.salary AS Salary, CONCAT(manager.first_name, " ", manager.last_name) AS Manager FROM employee JOIN rolename ON employee.role_id = rolename.id JOIN department ON rolename.department_id = department_id LEFT JOIN employee manager ON manager.id = employee.manager_id ORDER by employee.id;', function (err, data) { // ID's, first, last, titles, deparment, salaries, manager
+    db.query('SELECT employee.id AS Employee_ID, CONCAT (employee.first_name, " ", employee.last_name) AS Employee_Name, rolename.title AS Title, department.department_name AS Department, rolename.salary AS Salary, CONCAT(manager.first_name, " ", manager.last_name) AS Manager FROM employee JOIN rolename ON employee.role_id = rolename.id JOIN department ON rolename.department_id = department_id LEFT JOIN employee manager ON manager.id = employee.manager_id ORDER by employee.id;', function (err, data) { // ID's, first, last, titles, deparment, salaries, manager
                 console.table(data);
-        })
-        return mainMenu();
+    })
+    return mainMenu();
 }
 
 function viewRoles() { //shows all roles
     console.log(`======================================= 
           View All Roles
 =======================================`) // ID's, first, last, titles, deparment, salary 
-    db.query('SELECT rolename.id AS Role_ID, rolename.title AS Role_Title, rolename.salary AS Salary ORDER by rolename.id;', function (err, data) { // ID's, first, last, titles, deparment, sala ;', function (err, data) {
+    db.query('SELECT * FROM rolename;', function (err, data) { // ID's, first, last, titles, deparment, sala ;', function (err, data) {
+        
         console.table(data);
     })
     return mainMenu();
@@ -250,7 +251,6 @@ function viewDepts() { //shows all departments
 
 function assignManager(manager) { //assigns the employee id number as new hire's manager
     db.query('SELECT * FROM employee;', function (err, data) {
-        console.log(data);
         for (i = 0; i < data.length; i++){
             let managerName = data[i].first_name + data[i].last_name;
                 if (manager == managerName) {
