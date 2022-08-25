@@ -141,23 +141,15 @@ function mainMenu() { //main menu function. Inquirer prompt with vast switch sta
                 viewRoles();
                 break;
             case 'Add Employee':
-                // getEmployees()
-                // getRoles()
-                // getDepts()
                 addEmployee();
                 break;
             case 'Add Role':
-                // getRoles()
-                // getDepts()
                 addRole();
                 break;
             case 'Add Department':
                 addDepartment();
                 break;
             case 'Update Employee Role':
-                // getEmployees()
-                // getRoles()
-                // getDepts()
                 updateEmployee();
                 break;
             }
@@ -166,19 +158,20 @@ function mainMenu() { //main menu function. Inquirer prompt with vast switch sta
 
 function addEmployee(){ //function to add new employee
     inquirer.prompt(questions.newEmp).then((res) => {
-        console.log(allEmp);
-        console.log(allRoles);
         let newRole = assignRole(res.role);
         let newManager = assignManager(res.manager);
+        let newName = `${res.firstName} ${res.lastName}`;
 
         db.query('INSERT INTO employee SET ?', { 
             first_name: res.firstName, 
             last_name: res.lastName,
             role_id: newRole,
             manager_id: newManager
-        }) 
-        console.log('Added successfully'),
-        mainMenu()
+        });
+        
+        allEmp.push(newName);
+        console.log('Added successfully');
+        mainMenu();
     })
 
 }
@@ -198,10 +191,10 @@ function addRole(){ //function to add new role
             title: res.title, 
             salary: res.salary,
             department_id: departmentAssign
-        })
+        });
         allRoles.push(res.title); 
-        console.log('Added successfully'),
-        mainMenu()
+        console.log('Added successfully');
+        mainMenu();
     })
 }
 
@@ -209,10 +202,10 @@ function addDepartment(){ //function to add new department
     inquirer.prompt(questions.newDept).then((res) => {
         db.query('INSERT INTO department SET ?', { 
             department_name: res.department,
-        }) 
+        });
         allDepts.push(res.department); 
-        console.log('Added successfully'),
-        mainMenu()
+        console.log('Added successfully');
+        mainMenu();
     })
 }
 
@@ -229,22 +222,22 @@ function viewEmployees() { //shows all employees
     console.log(`=======================================
     View All Employees
 =======================================`)
-        db.query('SELECT * FROM employee;', function (err, data) { // ID's, first, last, titles, deparment, salaries, manager
+        db.query('SELECT employee.id AS Employee_ID, CONCAT (employee.first_name, " ", employee.last_name) AS Employee_Name, rolename.title AS Title, department.department_name AS Department, rolename.salary AS Salary, CONCAT(manager.first_name, " ", manager.last_name) AS Manager FROM employee JOIN rolename ON employee.role_id = rolename.id JOIN department ON rolename.department_id = department_id LEFT JOIN employee manager ON manager.id = employee.manager_id ORDER by employee.id;', function (err, data) { // ID's, first, last, titles, deparment, salaries, manager
                 console.table(data);
         })
         return mainMenu();
 }
 
 function viewRoles() { //shows all roles
-    console.log(`=======================================
+    console.log(`======================================= 
           View All Roles
-=======================================`)
-    db.query('SELECT * FROM rolename;', function (err, data) {
+=======================================`) // ID's, first, last, titles, deparment, salary 
+    db.query('SELECT rolename.id AS Role_ID, rolename.title AS Role_Title, rolename.salary AS Salary ORDER by rolename.id;', function (err, data) { // ID's, first, last, titles, deparment, sala ;', function (err, data) {
         console.table(data);
     })
     return mainMenu();
 }
-
+      
 function viewDepts() { //shows all departments
     console.log(`=======================================
           View All Departments
@@ -259,9 +252,8 @@ function assignManager(manager) { //assigns the employee id number as new hire's
     db.query('SELECT * FROM employee;', function (err, data) {
         console.log(data);
         for (i = 0; i < data.length; i++){
-            let managerName = JSON.stringify(data[i].first_name + data[i].last_name);
+            let managerName = data[i].first_name + data[i].last_name;
                 if (manager == managerName) {
-                    console.log(data[i].id);
                     return data[i].id;
                 }
             }
