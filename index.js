@@ -18,7 +18,7 @@ const questions =  { //array of objects containing all questions used for inquir
             type: 'list',
             name: 'menu',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Update Employee Role', 'Done Editing']
+            choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Update Employee Role']
         },
     ],
     newEmp: [
@@ -121,15 +121,23 @@ function mainMenu() { //main menu function. Inquirer prompt with vast switch sta
                 viewRoles();
                 break;
             case 'Add Employee':
+                getEmployees()
+                getRoles()
+                getDepts()
                 addEmployee();
                 break;
             case 'Add Role':
+                getRoles()
+                getDepts()
                 addRole();
                 break;
             case 'Add Department':
                 addDepartment();
                 break;
             case 'Update Employee Role':
+                getEmployees()
+                getRoles()
+                getDepts()
                 updateEmployee();
                 break;
             }
@@ -141,7 +149,8 @@ function mainMenu() { //main menu function. Inquirer prompt with vast switch sta
 
 function addEmployee(){ //function to add new employee
     inquirer.prompt(questions.newEmp).then((res) => {
-
+        console.log(allEmp);
+        console.log(allRoles);
         let newRole = assignRole(res.role);
         let newManager = assignManager(res.manager);
 
@@ -202,7 +211,7 @@ function viewEmployees() { //shows all employees
     console.log(`=======================================
     View All Employees
 =======================================`)
-        db.query('SELECT * FROM employee;', function (err, data) {
+        db.query('SELECT * FROM employee;', function (err, data) { // ID's, first, last, titles, deparment, salaries, manager
                 console.table(data);
         })
         return mainMenu();
@@ -229,12 +238,12 @@ function viewDepts() { //shows all departments
 }
 
 function assignManager(manager) { //assigns the employee id number as new hire's manager
-    var dbData = [];
     db.query('SELECT * FROM employee;', function (err, data) {
-        dbData = data;
+        console.log(data);
         for (i = 0; i < data.length; i++){
             let managerName = JSON.stringify(data[i].first_name + data[i].last_name);
                 if (manager == managerName) {
+                    console.log(data[i].id);
                     return data[i].id;
                 }
             }
@@ -257,19 +266,22 @@ function getRoles() { //function to grab the most up-to-date list of roles
         for(var i = 0; i < data.length; i++){
             allRoles.push(data[i].title);
         }
+        console.log(allRoles);
+        return allRoles;
     })
-    return allRoles;
 }
 
-function getEmployees() { //function to grab the most up-to-date list of employees
+function getEmployees () { //function to grab the most up-to-date list of employees
     allEmp = [];
     db.query('SELECT * FROM employee;', function (err, data) {
         for(var i = 0; i < data.length; i++){
             let currentName = `${data[i].first_name} ${data[i].last_name}`;          
             allEmp.push(currentName);
+            
         }
+        console.log(allEmp);
+        return allEmp;
     })
-    return allEmp;
 }
 
 function getDepts() { //function to grab the most up-to-date list of departments
@@ -278,8 +290,9 @@ function getDepts() { //function to grab the most up-to-date list of departments
         for(var i = 0; i < data.length; i++){
             allDepts.push(data[i].department_name);
         }
+        console.log(allDepts);
+        return allDepts;
     })
-    return allDepts;
 }
 
 
@@ -287,7 +300,7 @@ function init() { //initializes the application
     console.log(`=======================================
  Employee Tracker SQL: by Vincent Yang
 =======================================`);
-    mainMenu()
+    mainMenu();
 }
 
 init()
