@@ -36,7 +36,7 @@ None
 ## Preview
 
 ![Main Menu](./Assets/preview1.png)
-![Walkthrough](./Assets/walkthrough.mp4)
+[Walkthrough Video](./Assets/walkthrough.mp4)
 
 ## Question
 
