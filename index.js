@@ -38,7 +38,7 @@ const questions =  { //array of objects containing all questions used for inquir
             type: 'list',
             name: 'menu',
             message: 'What would you like to do?',
-            choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department', 'Update Employee Role']
+            choices: ['View All Employees', 'View All Departments', 'View All Roles', 'Add Employee', 'Add Role', 'Add Department']
         },
     ],
     newEmp: [
@@ -165,8 +165,8 @@ function addEmployee(){ //function to add new employee
         db.query('INSERT INTO employee SET ?', { 
             first_name: res.firstName, 
             last_name: res.lastName,
-            role_id: newRole,
-            manager_id: newManager
+            role_id: 9,
+            manager_id: 1
         });
         
         allEmp.push(newName);
@@ -179,18 +179,9 @@ function addEmployee(){ //function to add new employee
 function addRole(){ //function to add new role
     inquirer.prompt(questions.newRole).then((res) => {
         let deptID = res.department;
-        let departmentAssign;
-        db.query('SELECT * FROM department;', function (err, data) {
-            for (var i = 0; i < data.length; i++){
-                if (deptID == data[i].department_name) {
-                    departmentAssign = parseInt(++i);
-                }
-            }
-        })
         db.query('INSERT INTO rolename SET ?', { 
             title: res.title, 
             salary: res.salary,
-            department_id: departmentAssign
         });
         allRoles.push(res.title); 
         console.log('Added successfully');
@@ -209,21 +200,12 @@ function addDepartment(){ //function to add new department
     })
 }
 
-function updateEmployee(){
-    inquirer.prompt(questions.updateEmp).then((res) => {
-        inquirer.prompt(questions.updatedEmp).then((res) => {
-
-        })
-    })
-}
-
-
 function viewEmployees() { //shows all employees
     console.log(`=======================================
     View All Employees
 =======================================`)
-    db.query('SELECT employee.id AS Employee_ID, CONCAT (employee.first_name, " ", employee.last_name) AS Employee_Name, rolename.title AS Title, department.department_name AS Department, rolename.salary AS Salary, CONCAT(manager.first_name, " ", manager.last_name) AS Manager FROM employee JOIN rolename ON employee.role_id = rolename.id JOIN department ON rolename.department_id = department_id LEFT JOIN employee manager ON manager.id = employee.manager_id ORDER by employee.id;', function (err, data) { // ID's, first, last, titles, deparment, salaries, manager
-                console.table(data);
+    db.query('SELECT employee.id AS Employee_ID, CONCAT (employee.first_name, " ", employee.last_name) AS Employee_Name, rolename.title AS Job_Title, department.department_name AS Department, rolename.salary AS Salary, employee.manager_id FROM employee JOIN rolename on rolename.id = employee.role_id JOIN Department ON rolename.department_id = department.id ORDER BY employee.id ASC;', function (err, data) { // ID's, first, last, titles, deparment, salaries, manager
+        console.table(data);
     })
     return mainMenu();
 }
@@ -231,8 +213,8 @@ function viewEmployees() { //shows all employees
 function viewRoles() { //shows all roles
     console.log(`======================================= 
           View All Roles
-=======================================`) // ID's, first, last, titles, deparment, salary 
-    db.query('SELECT * FROM rolename;', function (err, data) { // ID's, first, last, titles, deparment, sala ;', function (err, data) {
+=======================================`)
+    db.query('SELECT * FROM rolename;', function (err, data) {
         
         console.table(data);
     })
