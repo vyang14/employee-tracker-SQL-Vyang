@@ -158,31 +158,50 @@ function mainMenu() { //main menu function. Inquirer prompt with vast switch sta
 
 function addEmployee(){ //function to add new employee
     inquirer.prompt(questions.newEmp).then((res) => {
-        let newRole = assignRole(res.role);
-        let newManager = assignManager(res.manager);
+        let searchQuery = 'SELECT * FROM rolename where title = "' + res.role + '";';
+        var roleID;
+        var managerName = res.manager.split(" ");
+        var managerID = assignManager(managerName[1]);
         let newName = `${res.firstName} ${res.lastName}`;
 
-        db.query('INSERT INTO employee SET ?', { 
-            first_name: res.firstName, 
-            last_name: res.lastName,
-            role_id: 9,
-            manager_id: 1
+        db.query(searchQuery, function (err, data) {
+            roleID = data[0].id;
+
+            db.query('INSERT INTO employee SET ?', { 
+                first_name: res.firstName, 
+                last_name: res.lastName,
+                role_id: roleID,
+                manager_id: managerID,
+            });
         });
         
         allEmp.push(newName);
         console.log('Added successfully');
         mainMenu();
-    })
+    });
+};
 
-}
+function assignManager(manager) { //assigns the employee id number as new hire's manager
+    let searchQuery = 'SELECT * FROM employee where last_name = "' + manager + '";';
+    db.query(searchQuery, function (err, data) {
+        return data[0].id;
+    });
+};
 
 function addRole(){ //function to add new role
     inquirer.prompt(questions.newRole).then((res) => {
-        let deptID = res.department;
-        db.query('INSERT INTO rolename SET ?', { 
-            title: res.title, 
-            salary: res.salary,
+        let searchQuery = 'SELECT * FROM department where department_name = "' + res.department + '";';
+        var deptID;
+
+        db.query(searchQuery, function (err, data) {
+            deptID = data[0].id;
+            db.query('INSERT INTO rolename SET ?', { 
+                title: res.title, 
+                salary: res.salary,
+                department_id: deptID,
+            });
         });
+
         allRoles.push(res.title); 
         console.log('Added successfully');
         mainMenu();
@@ -229,27 +248,6 @@ function viewDepts() { //shows all departments
         console.table(data);
     })
     return mainMenu();
-}
-
-function assignManager(manager) { //assigns the employee id number as new hire's manager
-    db.query('SELECT * FROM employee;', function (err, data) {
-        for (i = 0; i < data.length; i++){
-            let managerName = data[i].first_name + data[i].last_name;
-                if (manager == managerName) {
-                    return data[i].id;
-                }
-            }
-    })
-}
-
-function assignRole(role) { //assigns the role id number to the new entry
-    db.query('SELECT * FROM rolename;', function (err, data) {
-        for (var i = 0; i < data.length; i++){
-            if (role == JSON.stringify(data[i].title)) {
-                return data[i].id;
-            }
-        }
-    })
 }
 
 function init() { //initializes the application
